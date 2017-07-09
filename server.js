@@ -17,6 +17,12 @@ app.use(bodyParser.json());
 
 app.use(morgan('dev'));
 
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 app.get('/', function (req, res) {
     res.send('API note-swift');
 });
@@ -41,7 +47,7 @@ app.get('/setup', function (req, res) {
 var apiRoutes = express.Router();
 
 apiRoutes.post('/auth', function (req, res) {
-    // find the user
+
     User.findOne({
         name: req.body.name
     }, function (err, user) {
