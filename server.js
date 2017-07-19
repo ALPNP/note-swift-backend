@@ -92,9 +92,7 @@ apiRoutes.post('/auth', function (req, res) {
                     token: token
                 });
             }
-
         }
-
     });
 });
 
