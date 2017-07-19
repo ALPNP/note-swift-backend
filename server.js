@@ -7,6 +7,7 @@ var mongoose = require('mongoose');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
 var User = require('./app/models/user'); // get our mongoose model
+var Cost = require('./app/models/cost');
 
 var port = process.env.PORT || 8080; // used to create, sign, and verify tokens
 mongoose.connect(config.database); // connect to database
@@ -28,23 +29,36 @@ app.get('/', function (req, res) {
 });
 
 app.get('/setup', function (req, res) {
-    var alex = new User({
-        name: 'alex',
-        password: 12345678,
-        admin: true
-    });
 
-    alex.save(function (err) {
-        if (err) {
-            throw err;
-        }
+    var provide = req.headers.provide,
+        password = req.headers.password;
 
-        console.log('User Saved');
-        res.json({success: true});
-    })
+    if (provide && password === '2344961') {
+
+        var admin = new User({
+            name: 'alex',
+            password: 12345678,
+            admin: true
+        });
+
+        admin.save(function (err) {
+            if (err) {
+                throw err;
+            }
+
+            console.log('User Saved');
+            res.json({success: true});
+        });
+    } else {
+        res.json({success: false})
+    }
 });
 
 var apiRoutes = express.Router();
+
+apiRoutes.get('/', function(req, res) {
+    res.json({ message: 'Welcome to the coolest API on earth!' });
+});
 
 apiRoutes.post('/auth', function (req, res) {
 
@@ -84,10 +98,21 @@ apiRoutes.post('/auth', function (req, res) {
     });
 });
 
+apiRoutes.post('/costs', function (req, res) {
+
+    res.json(req.body);
+
+    // var cost = new Cost({
+    //     date: req.body.date,
+    //     type: req.body.type,
+    //     amount: req.body.amount
+    // });
+});
+
 apiRoutes.use(function(req, res, next) {
 
     // check header or url parameters or post parameters for token
-    var token = req.body.token || req.query.token || req.headers['x-access-token'];
+    var token = req.body.token || req.query.token || req.headers['authorization'];
 
     // decode token
     if (token) {
@@ -113,10 +138,6 @@ apiRoutes.use(function(req, res, next) {
         });
 
     }
-});
-
-apiRoutes.get('/', function(req, res) {
-    res.json({ message: 'Welcome to the coolest API on earth!' });
 });
 
 apiRoutes.get('/users', function(req, res) {
