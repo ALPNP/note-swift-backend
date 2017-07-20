@@ -20,7 +20,8 @@ app.use(morgan('dev'));
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Methods", 'POST, GET, PUT, DELETE, OPTIONS');
     next();
 });
 
@@ -61,11 +62,9 @@ apiRoutes.get('/', function(req, res) {
 });
 
 apiRoutes.post('/auth', function (req, res) {
-
     User.findOne({
         name: req.body.name
     }, function (err, user) {
-
         if (err) {
             throw err;
         }
@@ -73,18 +72,15 @@ apiRoutes.post('/auth', function (req, res) {
         if (!user) {
             res.json({success: false, message: 'Authentication failed. User not found.'});
         } else if (user) {
-
             // check if password matches
             if (user.password != req.body.password) {
                 res.json({success: false, message: 'Authentication failed. Wrong password.'});
             } else {
-
                 // if user is found and password is right
                 // create a token
                 var token = jwt.sign(user, app.get('superSecret'), {
-                    expiresIn: 60*60*24 // expires in 24 hours
+                    expiresIn: 60 * 60 * 24 // expires in 24 hours
                 });
-
                 // return the information including token as JSON
                 res.json({
                     success: true,
@@ -96,46 +92,55 @@ apiRoutes.post('/auth', function (req, res) {
     });
 });
 
-apiRoutes.post('/costs', function (req, res) {
-
-    res.json(req.body);
-
-    // var cost = new Cost({
-    //     date: req.body.date,
-    //     type: req.body.type,
-    //     amount: req.body.amount
-    // });
+apiRoutes.use(function (req, res, next) {
+    if (req.method !== 'OPTIONS') {
+        // check header or url parameters or post parameters for token
+        var token = req.body.token || req.query.token || req.headers['authorization'];
+        // decode token
+        if (token) {
+            // verifies secret and checks exp
+            jwt.verify(token, app.get('superSecret'), function (err, decoded) {
+                if (err) {
+                    return res.json({success: false, message: 'Failed to authenticate token.'});
+                } else {
+                    // if everything is good, save to request for use in other routes
+                    req.decoded = decoded;
+                    next();
+                }
+            });
+        } else {
+            // if there is no token
+            // return an error
+            return res.status(403).send({
+                success: false,
+                message: 'No token provided.'
+            });
+        }
+    } else {
+        next();
+    }
 });
 
-apiRoutes.use(function(req, res, next) {
+apiRoutes.post('/costs', function (req, res) {
 
-    // check header or url parameters or post parameters for token
-    var token = req.body.token || req.query.token || req.headers['authorization'];
+    var cost = new Cost({
+        date: req.body.date,
+        type: req.body.type,
+        amount: req.body.amount
+    });
 
-    // decode token
-    if (token) {
+    cost.save(function (err) {
+        if (err) {
+            throw err;
+        }
 
-        // verifies secret and checks exp
-        jwt.verify(token, app.get('superSecret'), function(err, decoded) {
-            if (err) {
-                return res.json({ success: false, message: 'Failed to authenticate token.' });
-            } else {
-                // if everything is good, save to request for use in other routes
-                req.decoded = decoded;
-                next();
-            }
-        });
+        console.log('Cost Saved');
+        res.json({success: true});
+    });
+});
 
-    } else {
-
-        // if there is no token
-        // return an error
-        return res.status(403).send({
-            success: false,
-            message: 'No token provided.'
-        });
-
-    }
+apiRoutes.get('/costs', function (req, res) {
+    res.json(req.headers);
 });
 
 apiRoutes.get('/users', function(req, res) {
