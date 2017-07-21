@@ -4,5 +4,7 @@ var mongoose = require('mongoose'),
 module.exports = mongoose.model('Cost', new Schema({
     date: Date,
     type: String,
-    amount: Number
+    amount: Number,
+    username: String,
+    formatDate: String
 }));

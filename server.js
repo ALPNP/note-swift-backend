@@ -9,6 +9,9 @@ var config = require('./config'); // get our config file
 var User = require('./app/models/user'); // get our mongoose model
 var Cost = require('./app/models/cost');
 
+var moment = require('moment');
+moment.locale('ru');
+
 var port = process.env.PORT || 8080; // used to create, sign, and verify tokens
 mongoose.connect(config.database); // connect to database
 app.set('superSecret', config.secret); // secret variable
@@ -125,8 +128,12 @@ apiRoutes.post('/costs', function (req, res) {
 
     var cost = new Cost({
         date: req.body.date,
+        formatDate: (function () {
+            return moment(req.body.date).format('L');
+        })(),
         type: req.body.type,
-        amount: req.body.amount
+        amount: req.body.amount,
+        username: req.body.username
     });
 
     cost.save(function (err) {
@@ -140,7 +147,55 @@ apiRoutes.post('/costs', function (req, res) {
 });
 
 apiRoutes.get('/costs', function (req, res) {
-    res.json(req.headers);
+
+    var sort = {date: -1};
+
+    Cost.find({}).sort(sort).exec(function (err, costs) {
+        if (err) {
+            throw err;
+        }
+
+        var result = {
+            content: costs
+        };
+
+        res.json(result);
+    });
+});
+
+apiRoutes.get('/costs/chart', function (req, res) {
+
+    var currentDay = moment().format('L');
+    var currentWeekDays = [];
+
+    for (var i = 0; i < 7; i++) {
+        var day = {
+            date: (function () {
+                var date = moment().add(-[i], 'd');
+                return moment(date).format('L');
+            })(),
+            costs: []
+        };
+
+        Cost.find({formatDate: day.date}, function (err, costs) {
+            if (costs.length > 0) {
+                // console.log(currentWeekDays[i2]);
+                console.log(costs);
+                day['costs'] = costs;
+            }
+        });
+
+        currentWeekDays.push(day);
+    }
+
+    var result = {
+        content: {
+            currentDay: currentDay,
+            currentWeekDays: currentWeekDays
+        }
+    };
+
+    res.json(result);
 });
 
 apiRoutes.get('/users', function(req, res) {
