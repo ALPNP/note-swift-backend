@@ -3,11 +3,11 @@ var app = express();
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var mongoose = require('./app/libs/mongoose');
-var root = require('./app/routes/public-routes/root/root');
-var guard = require('./app/routes/guard/guard');
-var costs = require('./app/routes/costs/costs');
-var users = require('./app/routes/users/users');
-var auth = require('./app/routes/auth/auth');
+var root = require('./app/routes/public/root/root');
+var guard = require('./app/guards/auth.guard.js');
+var costs = require('./app/routes/secured/api/costs');
+var users = require('./app/routes/secured/api/users');
+var auth = require('./app/routes/public/auth/auth');
 var port = process.env.PORT || 8080; // used to create, sign, and verify tokens
 
 app.use(bodyParser.urlencoded({extended: false}));
