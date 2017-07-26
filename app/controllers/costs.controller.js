@@ -26,6 +26,16 @@ var costsController = {
                 currentWeekDays.push(day);
             }
 
+            _.forEach(currentWeekDays, function (value) {
+                var searchDay = value;
+                var searchDate = value.date;
+                _.forEach(costs, function (value) {
+                    if (value.formatDate === searchDate) {
+                        searchDay.costs.push(value);
+                    }
+                });
+            });
+
             _.forEachRight(currentWeekDays, function (day) {
                 chartLabels.push(day.date);
             });
@@ -35,27 +45,34 @@ var costsController = {
                     return cost.formatDate === label;
                 });
 
-                _.forEach(filtered, function (filteredItem) {
-                    var add, remove;
-                    
-                });
-            });
+                var add = 0,
+                    remove = 0;
 
-            // _.forEach(currentWeekDays, function (value) {
-            //     var searchDay = value;
-            //     var searchDate = value.date;
-            //     _.forEach(costs, function (value) {
-            //         if (value.formatDate === searchDate) {
-            //             searchDay.costs.push(value);
-            //         }
-            //     });
-            // });
+                if (filtered.length === 0) {
+                    chartData[0].data.push(add);
+                    chartData[1].data.push(remove);
+                } else {
+                    _.forEach(filtered, function (filteredItem) {
+                        console.log(filteredItem);
+                        if (filteredItem.type === 'add') {
+                            add = filteredItem.amount + add;
+                        } else if (filteredItem.type === 'remove') {
+                            remove = filteredItem.amount + remove;
+                        }
+                    });
+
+                    chartData[0].data.push(add);
+                    chartData[1].data.push(remove);
+                }
+            });
 
             var result = {
                 content: {
                     currentDay: currentDay,
-                    chartLabels: chartLabels,
-                    chartData: chartData
+                    chartData: {
+                        chartLabels: chartLabels,
+                        chartData: chartData
+                    }
                 }
             };
 
