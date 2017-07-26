@@ -12,7 +12,7 @@ router.post('/costs', function (req, res) {
 });
 
 router.get('/costs/chart', function (req, res) {
-    costsController.getCostsChart(req, res);
+    costsController.getCostsChartData(req, res);
 });
 
 module.exports = router;

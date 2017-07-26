@@ -3,11 +3,16 @@ var moment = require('./../libs/moment');
 var _ = require('lodash');
 
 var costsController = {
-    getCostsChart: function (req, res) {
+    getCostsChartData: function (req, res) {
         Cost.find({}, function (err, costs) {
 
             var currentDay = moment().format('L');
             var currentWeekDays = [];
+            var chartLabels = [];
+            var chartData = [
+                {data: [], label: 'Доходы'},
+                {data: [], label: 'Расходы'}
+            ];
 
             for (var i = 0; i < 7; i++) {
                 var day = {
@@ -21,20 +26,36 @@ var costsController = {
                 currentWeekDays.push(day);
             }
 
-            _.forEach(currentWeekDays, function (value) {
-                var searchDay = value;
-                var searchDate = value.date;
-                _.forEach(costs, function (value) {
-                    if (value.formatDate === searchDate) {
-                        searchDay.costs.push(value);
-                    }
+            _.forEachRight(currentWeekDays, function (day) {
+                chartLabels.push(day.date);
+            });
+
+            _.forEach(chartLabels, function (label) {
+                var filtered = _.filter(costs, function (cost) {
+                    return cost.formatDate === label;
+                });
+
+                _.forEach(filtered, function (filteredItem) {
+                    var add, remove;
+                    
                 });
             });
+
+            // _.forEach(currentWeekDays, function (value) {
+            //     var searchDay = value;
+            //     var searchDate = value.date;
+            //     _.forEach(costs, function (value) {
+            //         if (value.formatDate === searchDate) {
+            //             searchDay.costs.push(value);
+            //         }
+            //     });
+            // });
 
             var result = {
                 content: {
                     currentDay: currentDay,
-                    currentWeekDays: currentWeekDays
+                    chartLabels: chartLabels,
+                    chartData: chartData
                 }
             };
 
