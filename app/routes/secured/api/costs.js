@@ -15,4 +15,8 @@ router.get('/costs/chart', function (req, res) {
     costsController.getCostsChartData(req, res);
 });
 
+router.delete('/costs', function (req, res) {
+    costsController.deleteCost(req, res);
+});
+
 module.exports = router;
