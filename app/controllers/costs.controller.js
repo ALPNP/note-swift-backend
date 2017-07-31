@@ -53,7 +53,6 @@ var costsController = {
                     chartData[1].data.push(remove);
                 } else {
                     _.forEach(filtered, function (filteredItem) {
-                        console.log(filteredItem);
                         if (filteredItem.type === 'add') {
                             add = filteredItem.amount + add;
                         } else if (filteredItem.type === 'remove') {
@@ -110,12 +109,22 @@ var costsController = {
                 throw err;
             }
 
-            console.log('Cost Saved');
             return res.json({success: true});
+        });
+    },
+    deleteCost: function (req, res) {
+        Cost.find({'_id': req['body']['_id']}).remove().exec(function (err, cost) {
+            if (err) {
+                res.json(err);
+            }
+
+            if (cost.result.n == 1) {
+                res.json({success: true});
+            } else {
+                res.json({success: false});
+            }
         });
     }
 };
 
 module.exports = costsController;
-
-
