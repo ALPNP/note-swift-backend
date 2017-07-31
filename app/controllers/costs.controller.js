@@ -69,7 +69,7 @@ var costsController = {
             var result = {
                 content: {
                     currentDay: currentDay,
-                    chartData: {
+                    chart: {
                         chartLabels: chartLabels,
                         chartData: chartData
                     }
