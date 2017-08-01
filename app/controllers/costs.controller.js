@@ -3,6 +3,35 @@ var moment = require('./../libs/moment');
 var _ = require('lodash');
 
 var costsController = {
+    getCost: function (req, res) {
+        Cost.findById(req.params.id || 0, function (err, cost) {
+            if (cost) {
+                res.json(cost);
+            } else {
+                res.json({
+                    success: false,
+                    message: 'Записей не найдено'
+                })
+            }
+        });
+    },
+    updateCost: function (req, res) {
+
+        var costForSave = new Cost(req.body);
+
+        Cost.findById(costForSave['_id'] || 0, function (err, cost) {
+            if (cost) {
+                cost.update({ _id: costForSave['_id']}, {$set: costForSave}, function (err, updatedCost) {
+                    res.json(updatedCost);
+                });
+            } else {
+                res.json({
+                    success: false,
+                    message: 'Обновляемая запись отсутствует'
+                })
+            }
+        });
+    },
     getCostsChartData: function (req, res) {
         Cost.find({}, function (err, costs) {
 
@@ -101,7 +130,8 @@ var costsController = {
             })(),
             type: req.body.type,
             amount: req.body.amount,
-            username: req.body.username
+            username: req.body.username,
+            description: req.body.description
         });
 
         cost.save(function (err) {

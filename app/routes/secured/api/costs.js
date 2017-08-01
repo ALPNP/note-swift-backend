@@ -19,4 +19,12 @@ router.delete('/costs', function (req, res) {
     costsController.deleteCost(req, res);
 });
 
+router.get('/costs/:id', function (req, res) {
+    costsController.getCost(req, res);
+});
+
+router.put('/costs', function (req, res) {
+    costsController.updateCost(req, res);
+});
+
 module.exports = router;
