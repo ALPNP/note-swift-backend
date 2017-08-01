@@ -6,5 +6,6 @@ module.exports = mongoose.model('Cost', new Schema({
     type: String,
     amount: Number,
     username: String,
-    formatDate: String
+    formatDate: String,
+    description: String
 }));
