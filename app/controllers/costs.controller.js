@@ -1,10 +1,14 @@
 var Cost = require('./../models/cost');
 var moment = require('./../libs/moment');
 var _ = require('lodash');
+var utilities = require('./../utilities/utilitites');
 
 var costsController = {
     getCost: function (req, res) {
         Cost.findById(req.params.id || 0, function (err, cost) {
+
+            console.log(cost);
+
             if (cost) {
                 res.json(cost);
             } else {
@@ -17,19 +21,34 @@ var costsController = {
     },
     updateCost: function (req, res) {
 
-        var costForSave = new Cost(req.body);
+        var costForSave = req.body;
 
         Cost.findById(costForSave['_id'] || 0, function (err, cost) {
-            if (cost) {
-                cost.update({ _id: costForSave['_id']}, {$set: costForSave}, function (err, updatedCost) {
-                    res.json(updatedCost);
-                });
-            } else {
-                res.json({
-                    success: false,
-                    message: 'Обновляемая запись отсутствует'
-                })
-            }
+
+            cost.amount = costForSave.amount;
+            cost.date = costForSave.date;
+            cost.description = costForSave.description;
+            cost.formatDate = utilities.formatDate(costForSave.date);
+
+            cost.save(function (err) {
+                if (err) {
+                    res.json(err)
+                } else {
+                    res.json(cost);
+                }
+            });
+
+            // if (cost) {
+            //     cost.update({ _id: costForSave['_id']}, {$set: costForSave}, function (err, updatedCost) {
+            //         cost.save();
+            //         res.json(updatedCost);
+            //     });
+            // } else {
+            //     res.json({
+            //         success: false,
+            //         message: 'Запись для обновления не найдена'
+            //     })
+            // }
         });
     },
     getCostsChartData: function (req, res) {
@@ -125,9 +144,7 @@ var costsController = {
     addCost: function (req, res) {
         var cost = new Cost({
             date: req.body.date,
-            formatDate: (function () {
-                return moment(req.body.date).format('L');
-            })(),
+            formatDate: utilities.formatDate(req.body.date),
             type: req.body.type,
             amount: req.body.amount,
             username: req.body.username,

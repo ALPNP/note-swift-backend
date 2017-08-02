@@ -1,9 +1,9 @@
 var express = require('express');
-var router = express.Router();
+var guardService = express.Router();
 var jwt = require('jsonwebtoken');
 var config = require('./../../config');
 
-router.use(function (req, res, next) {
+guardService.use(function (req, res, next) {
     if (req.method !== 'OPTIONS') {
         // check header or url parameters or post parameters for token
         var token = req.body.token || req.query.token || req.headers['authorization'];
@@ -32,4 +32,4 @@ router.use(function (req, res, next) {
     }
 });
 
-module.exports = router;
+module.exports = guardService;
