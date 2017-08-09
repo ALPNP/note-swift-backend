@@ -3,10 +3,46 @@ var moment = require('./../libs/moment');
 var utilities = require('./../utilities/utilitites');
 
 var costsController = {
+    getCost: function (req, res) {
+        Cost.findById(req.params.id || 0, function (err, cost) {
+
+            console.log(cost);
+
+            if (cost) {
+                res.json(cost);
+            } else {
+                res.json({
+                    success: false,
+                    message: 'Записей не найдено'
+                })
+            }
+        });
+    },
+    updateCost: function (req, res) {
+
+        var costForSave = req.body;
+
+        Cost.findById(costForSave['_id'] || 0, function (err, cost) {
+
+            cost.amount = costForSave.amount;
+            cost.date = costForSave.date;
+            cost.description = costForSave.description;
+            cost.formatDate = utilities.formatDate(costForSave.date);
+            cost.type = costForSave.type;
+
+            cost.save(function (err) {
+                if (err) {
+                    res.json(err)
+                } else {
+                    res.json(cost);
+                }
+            });
+        });
+    },
     getCostsChartData: function (req, res) {
-
-        var daysCount = req.headers.dayscount || 7;
-
+      
+      var daysCount = req.headers.dayscount || 7;
+      
         Cost.find({}, function (err, costs) {
             if (err) {
                 throw err;
