@@ -29,6 +29,7 @@ var costsController = {
             cost.date = costForSave.date;
             cost.description = costForSave.description;
             cost.formatDate = utilities.formatDate(costForSave.date);
+            cost.type = costForSave.type;
 
             cost.save(function (err) {
                 if (err) {
@@ -37,18 +38,6 @@ var costsController = {
                     res.json(cost);
                 }
             });
-
-            // if (cost) {
-            //     cost.update({ _id: costForSave['_id']}, {$set: costForSave}, function (err, updatedCost) {
-            //         cost.save();
-            //         res.json(updatedCost);
-            //     });
-            // } else {
-            //     res.json({
-            //         success: false,
-            //         message: 'Запись для обновления не найдена'
-            //     })
-            // }
         });
     },
     getCostsChartData: function (req, res) {
