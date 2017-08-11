@@ -30,7 +30,7 @@ var utilities = {
     createChartDataWithCurrentDayByLastDaysCount: function (items, daysCount) {
 
         var currentDay = moment().format('L');
-        var currentWeekDays = [];
+        var currentDays = [];
         var chartLabels = [];
         var chartData = [
             {data: [], label: 'Доходы'},
@@ -46,10 +46,10 @@ var utilities = {
                 costs: []
             };
 
-            currentWeekDays.push(day);
+            currentDays.push(day);
         }
 
-        _.forEach(currentWeekDays, function (value) {
+        _.forEach(currentDays, function (value) {
             var searchDay = value;
             var searchDate = value.date;
             _.forEach(items, function (value) {
@@ -59,7 +59,7 @@ var utilities = {
             });
         });
 
-        _.forEachRight(currentWeekDays, function (day) {
+        _.forEachRight(currentDays, function (day) {
             chartLabels.push(day.date);
         });
 
@@ -88,15 +88,52 @@ var utilities = {
             }
         });
 
-        var result = {
+        return {
             currentDay: currentDay,
             chart: {
                 chartLabels: chartLabels,
                 chartData: chartData
             }
         };
+    },
+    createStatisticDataWithCurrentDayByLastDaysCount: function(items, daysCount) {
 
-        return result;
+        var currentDay = moment().format('L');
+        var currentDays = [];
+        var addSummary = 0;
+        var removeSummary = 0;
+
+        for (var i = 0; i < daysCount; i++) {
+            var day = {
+                date: (function () {
+                    var date = moment().add(-[i], 'd');
+                    return moment(date).format('L');
+                })()
+            };
+
+            currentDays.push(day);
+        }
+
+        _.forEach(currentDays, function (value) {
+            var searchDate = value.date;
+            _.forEach(items, function (value) {
+                if (value.formatDate === searchDate) {
+                    if (value.type === 'add') {
+                        addSummary += value.amount;
+                    } else if (value.type === 'remove') {
+                        removeSummary += value.amount;
+                    }
+                }
+            });
+        });
+
+        return {
+            addSummary: addSummary,
+            removeSummary: removeSummary,
+            currentDay: currentDay,
+            startDay: currentDays[0].date,
+            endDay: currentDays[currentDays.length - 1].date
+        };
     }
 };
 
