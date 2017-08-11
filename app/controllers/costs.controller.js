@@ -3,10 +3,29 @@ var moment = require('./../libs/moment');
 var utilities = require('./../utilities/utilitites');
 
 var costsController = {
+    addCost: function (req, res) {
+        var cost = new Cost({
+            date: req.body.date,
+            formatDate: utilities.formatDate(req.body.date),
+            type: req.body.type,
+            amount: req.body.amount,
+            username: req.body.username,
+            description: req.body.description
+        });
+
+        cost.save(function (err) {
+            if (err) {
+                throw err;
+            }
+
+            return res.json({success: true});
+        });
+    },
     getCost: function (req, res) {
         Cost.findById(req.params.id || 0, function (err, cost) {
-
-            console.log(cost);
+            if (err) {
+                throw err;
+            }
 
             if (cost) {
                 res.json(cost);
@@ -15,6 +34,19 @@ var costsController = {
                     success: false,
                     message: 'Записей не найдено'
                 })
+            }
+        });
+    },
+    deleteCost: function (req, res) {
+        Cost.find({'_id': req['body']['_id']}).remove().exec(function (err, cost) {
+            if (err) {
+                throw err;
+            }
+
+            if (cost.result.n == 1) {
+                res.json({success: true});
+            } else {
+                res.json({success: false});
             }
         });
     },
@@ -32,28 +64,11 @@ var costsController = {
 
             cost.save(function (err) {
                 if (err) {
-                    res.json(err)
+                    throw err;
                 } else {
                     res.json(cost);
                 }
             });
-        });
-    },
-    getCostsChartData: function (req, res) {
-      
-      var daysCount = req.headers.dayscount || 7;
-      
-        Cost.find({}, function (err, costs) {
-            if (err) {
-                throw err;
-            }
-
-            var result = {
-                content: utilities.createChartDataWithCurrentDayByLastDaysCount(costs, daysCount),
-                daysCount: daysCount
-            };
-
-            return res.json(result);
         });
     },
     getCosts: function (req, res) {
@@ -74,69 +89,38 @@ var costsController = {
             return res.json(result);
         });
     },
-    getCost: function (req, res) {
-        Cost.findById(req.params.id || 0, function (err, cost) {
+    getCostsChartData: function (req, res) {
 
-            if (cost) {
-                res.json(cost);
-            } else {
-                res.json({
-                    success: false,
-                    message: 'Записей не найдено'
-                });
-            }
-        });
-    },
-    addCost: function (req, res) {
-        var cost = new Cost({
-            date: req.body.date,
-            formatDate: utilities.formatDate(req.body.date),
-            type: req.body.type,
-            amount: req.body.amount,
-            username: req.body.username,
-            description: req.body.description
-        });
+        var daysCount = req.headers.dayscount || 7;
 
-        cost.save(function (err) {
+        Cost.find({}, function (err, costs) {
             if (err) {
                 throw err;
             }
 
-            return res.json({success: true});
+            var result = {
+                content: utilities.createChartDataWithCurrentDayByLastDaysCount(costs, daysCount),
+                daysCount: daysCount
+            };
+
+            return res.json(result);
         });
     },
-    updateCost: function (req, res) {
+    getCostsStatisticData: function (req, res) {
 
-        var costForSave = req.body;
+        var daysCount = req.headers.daysCount || 7;
 
-        Cost.findById(costForSave['_id'] || 0, function (err, cost) {
-
-            cost.amount = costForSave.amount;
-            cost.date = costForSave.date;
-            cost.description = costForSave.description;
-            cost.formatDate = utilities.formatDate(costForSave.date);
-            cost.type = costForSave.type;
-
-            cost.save(function (err) {
-                if (err) {
-                    res.json(err)
-                } else {
-                    res.json(cost);
-                }
-            });
-        });
-    },
-    deleteCost: function (req, res) {
-        Cost.find({'_id': req['body']['_id']}).remove().exec(function (err, cost) {
+        Cost.find({}, function (err, costs) {
             if (err) {
-                res.json(err);
+                throw err;
             }
 
-            if (cost.result.n == 1) {
-                res.json({success: true});
-            } else {
-                res.json({success: false});
-            }
+            var result = {
+                content: utilities.createStatisticDataWithCurrentDayByLastDaysCount(costs, daysCount),
+                daysCount: daysCount
+            };
+
+            res.json(result);
         });
     }
 };
