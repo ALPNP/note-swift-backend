@@ -98,7 +98,7 @@ var utilities = {
     },
     createStatisticDataWithCurrentDayByLastDaysCount: function(items, daysCount) {
 
-        var currentDay = moment().format('L');
+        var currentDay = moment();
         var currentDays = [];
         var addSummary = 0;
         var removeSummary = 0;
