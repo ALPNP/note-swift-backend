@@ -1,5 +1,4 @@
 var Cost = require('./../models/cost');
-var moment = require('./../libs/moment');
 var utilities = require('./../utilities/utilitites');
 
 var costsController = {
@@ -51,11 +50,9 @@ var costsController = {
         });
     },
     updateCost: function (req, res) {
-
         var costForSave = req.body;
 
         Cost.findById(costForSave['_id'] || 0, function (err, cost) {
-
             cost.amount = costForSave.amount;
             cost.date = costForSave.date;
             cost.description = costForSave.description;
@@ -72,7 +69,6 @@ var costsController = {
         });
     },
     getCosts: function (req, res) {
-
         var daysCount = req.headers.dayscount || 7;
         var sort = {date: -1};
 
@@ -90,7 +86,6 @@ var costsController = {
         });
     },
     getCostsChartData: function (req, res) {
-
         var daysCount = req.headers.dayscount || 7;
 
         Cost.find({}, function (err, costs) {
@@ -107,7 +102,6 @@ var costsController = {
         });
     },
     getCostsStatisticData: function (req, res) {
-
         var daysCount = req.headers.daysCount || 7;
 
         Cost.find({}, function (err, costs) {
