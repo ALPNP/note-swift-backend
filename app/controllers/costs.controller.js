@@ -1,5 +1,6 @@
 var Cost = require('./../models/cost');
 var utilities = require('./../utilities/utilitites');
+var url = require('url');
 
 var costsController = {
     addCost: function (req, res) {
@@ -116,6 +117,16 @@ var costsController = {
 
             res.json(result);
         });
+    },
+    getCostsByDateInterval: function (req, res) {
+        const parsedUrl = url.parse(req.url, true);
+
+        var dateInterval = {
+            startDate: parsedUrl.query['startDate'] || null,
+            endDate: parsedUrl.query['endDate'] || null
+        };
+
+        res.json(dateInterval);
     }
 };
 
