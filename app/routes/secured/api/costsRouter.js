@@ -26,6 +26,10 @@ costsRouter.get('/costs/statistic', function (req, res) {
     costsController.getCostsStatisticData(req, res);
 });
 
+costsRouter.get('/costs/search', function (req, res) {
+    costsController.getCostsByDateInterval(req, res);
+});
+
 costsRouter.get('/costs/:id', function (req, res) {
     costsController.getCost(req, res);
 });
