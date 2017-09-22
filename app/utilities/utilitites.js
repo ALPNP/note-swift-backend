@@ -5,30 +5,21 @@ var utilities = {
     formatDate: function (date) {
         return moment(date).format('L');
     },
-    filterItemsByLastDaysCount: function (items, daysCount) {
-        var currentIntervalDays = [];
-        var searchResult = [];
-
-        for (var i = 0; i < daysCount; i++) {
-            var day = (function () {
-                return moment(moment().add(-[i], 'd')).format('L');
-            })();
-
-            currentIntervalDays.push(day);
+    getDate: function (date, format) {
+        if (date) {
+            return (format) ? moment(date).format(format) : moment(date);
         }
 
-        _.forEach(currentIntervalDays, function (day) {
-            _.forEach(items, function (item) {
-                if (item.formatDate === day) {
-                    searchResult.push(item);
-                }
-            });
-        });
+        if (format) {
+            return moment().format(format);
+        }
 
-        return searchResult;
+        return moment();
+    },
+    getDateByDateByDaysCount: function (date, daysCount) {
+        return moment(moment(date).add(-daysCount, 'd'));
     },
     createChartDataWithCurrentDayByLastDaysCount: function (items, daysCount) {
-
         var currentDay = moment().format('L');
         var currentDays = [];
         var chartLabels = [];
@@ -97,7 +88,6 @@ var utilities = {
         };
     },
     createStatisticDataWithCurrentDayByLastDaysCount: function(items, daysCount) {
-
         var currentDay = moment();
         var currentDays = [];
         var addSummary = 0;
