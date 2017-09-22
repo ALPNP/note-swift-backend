@@ -9,7 +9,6 @@ var costsController = {
             formatDate: utilities.formatDate(req.body.date),
             type: req.body.type,
             amount: req.body.amount,
-            username: req.body.username,
             description: req.body.description
         });
 
@@ -38,7 +37,9 @@ var costsController = {
         });
     },
     deleteCost: function (req, res) {
-        Cost.find({'_id': req['body']['_id']}).remove().exec(function (err, cost) {
+        Cost.find({
+            '_id': req['body']['_id']
+        }).remove().exec(function (err, cost) {
             if (err) {
                 throw err;
             }
@@ -70,21 +71,56 @@ var costsController = {
         });
     },
     getCosts: function (req, res) {
-        var daysCount = req.headers.dayscount || 7;
-        var sort = {date: -1};
+        const parsedUrl = url.parse(req.url, true);
+        var result = {};
 
-        Cost.find({}).sort(sort).exec(function (err, costs) {
-            if (err) {
-                throw err;
-            }
-
-            var result = {
-                content: utilities.filterItemsByLastDaysCount(costs, daysCount),
-                daysCount: daysCount
+        if (parsedUrl.query['startDate'] !== 'null') {
+            var dateInterval = {
+                startDate: new Date(parsedUrl.query['startDate']),
+                endDate: null
             };
 
-            return res.json(result);
-        });
+            dateInterval.endDate = (parsedUrl.query['endDate'] !== 'null') ? new Date(parsedUrl.query['endDate']) : new Date(utilities.getDate());
+
+            Cost.find({
+                date: {
+                    $gte: dateInterval.startDate,
+                    $lte: dateInterval.endDate
+                }
+            }).sort({date: -1}).exec(function (err, costs) {
+                if (err) {
+                    res.json(err);
+                }
+
+                result = {
+                    content: costs,
+                    daysCount: null
+                };
+
+                res.json(result);
+            });
+        } else {
+            var currentDay = utilities.getDate();
+            var startDate = utilities.getDateByDateByDaysCount(currentDay, 7);
+
+            Cost.find({
+                date: {
+                    $gte: startDate,
+                    $lte: currentDay
+                }
+            }).sort({date: -1}).exec(function (err, costs) {
+                if (err) {
+                    res.json(err);
+                }
+
+                result = {
+                    content: costs,
+                    daysCount: 7
+                };
+
+                res.json(result);
+            });
+        }
     },
     getCostsChartData: function (req, res) {
         var daysCount = req.headers.dayscount || 7;
@@ -117,16 +153,6 @@ var costsController = {
 
             res.json(result);
         });
-    },
-    getCostsByDateInterval: function (req, res) {
-        const parsedUrl = url.parse(req.url, true);
-
-        var dateInterval = {
-            startDate: parsedUrl.query['startDate'] || null,
-            endDate: parsedUrl.query['endDate'] || null
-        };
-
-        res.json(dateInterval);
     }
 };
 

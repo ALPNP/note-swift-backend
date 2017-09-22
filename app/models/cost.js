@@ -5,7 +5,8 @@ module.exports = mongoose.model('Cost', new Schema({
     date: Date,
     type: String,
     amount: Number,
-    username: String,
+    userId: Number,
+    // you must remove this bad choise
     formatDate: String,
     description: String
 }));
