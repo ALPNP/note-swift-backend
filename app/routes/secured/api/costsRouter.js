@@ -23,7 +23,7 @@ costsRouter.get('/costs/chart', function (req, res) {
 });
 
 costsRouter.get('/costs/statistic', function (req, res) {
-    costsController.getCostsStatisticData(req, res);
+    costsController.getCostsStatisticDataByInterval(req, res);
 });
 
 costsRouter.get('/costs/:id', function (req, res) {

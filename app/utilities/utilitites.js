@@ -87,42 +87,24 @@ var utilities = {
             }
         };
     },
-    createStatisticDataWithCurrentDayByLastDaysCount: function(items, daysCount) {
-        var currentDay = moment();
-        var currentDays = [];
+    createStatisticData: function (costs, startDay, endDay) {
         var addSummary = 0;
         var removeSummary = 0;
 
-        for (var i = 0; i < daysCount; i++) {
-            var day = {
-                date: (function () {
-                    var date = moment().add(-[i], 'd');
-                    return moment(date).format('L');
-                })()
-            };
-
-            currentDays.push(day);
-        }
-
-        _.forEach(currentDays, function (value) {
-            var searchDate = value.date;
-            _.forEach(items, function (value) {
-                if (value.formatDate === searchDate) {
-                    if (value.type === 'add') {
-                        addSummary += value.amount;
-                    } else if (value.type === 'remove') {
-                        removeSummary += value.amount;
-                    }
-                }
-            });
+        _.forEach(costs, function (cost) {
+            if (cost.type === 'add') {
+                addSummary += cost.amount;
+            } else if (cost.type === 'remove') {
+                removeSummary += cost.amount;
+            }
         });
 
         return {
             addSummary: addSummary,
             removeSummary: removeSummary,
-            currentDay: currentDay,
-            startDay: currentDays[0].date,
-            endDay: currentDays[currentDays.length - 1].date
+            currentDay: moment(),
+            startDay: moment(startDay).format('L'),
+            endDay: moment(endDay).format("L")
         };
     }
 };

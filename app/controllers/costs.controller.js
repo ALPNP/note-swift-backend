@@ -77,10 +77,10 @@ var costsController = {
         if (parsedUrl.query['startDate'] !== 'null') {
             var dateInterval = {
                 startDate: new Date(parsedUrl.query['startDate']),
-                endDate: null
+                endDate: (function () {
+                    return (parsedUrl.query['endDate'] !== 'null') ? new Date(parsedUrl.query['endDate']) : new Date(utilities.getDate());
+                })()
             };
-
-            dateInterval.endDate = (parsedUrl.query['endDate'] !== 'null') ? new Date(parsedUrl.query['endDate']) : new Date(utilities.getDate());
 
             Cost.find({
                 date: {
@@ -138,21 +138,51 @@ var costsController = {
             return res.json(result);
         });
     },
-    getCostsStatisticData: function (req, res) {
-        var daysCount = req.headers.daysCount || 7;
+    getCostsStatisticDataByInterval: function (req, res) {
+        const parsedUrl = url.parse(req.url, true);
+        const defaultDaysCount = 7;
+        var result = {};
 
-        Cost.find({}, function (err, costs) {
-            if (err) {
-                throw err;
-            }
-
-            var result = {
-                content: utilities.createStatisticDataWithCurrentDayByLastDaysCount(costs, daysCount),
-                daysCount: daysCount
+        if (parsedUrl.query['startDate'] !== 'null') {
+            var dateInterval = {
+                startDate: new Date(parsedUrl.query['startDate']),
+                endDate: null
             };
 
-            res.json(result);
-        });
+            dateInterval.endDate = (parsedUrl.query['endDate'] !== 'null') ? new Date(parsedUrl.query['endDate']) : new Date(utilities.getDate());
+
+            Cost.find({
+                date: {
+                    $gte: dateInterval.startDate,
+                    $lte: dateInterval.endDate
+                }
+            }).exec(function (err, costs) {
+                if (err) {
+                    res.json(err);
+                }
+
+                result.content = utilities.createStatisticData(costs, dateInterval.startDate, dateInterval.endDate);
+                res.json(result);
+            });
+        } else {
+            var currentDay = utilities.getDate();
+            var startDate = utilities.getDateByDateByDaysCount(currentDay, defaultDaysCount);
+
+            Cost.find({
+                date: {
+                    $gte: startDate,
+                    $lte: currentDay
+                }
+            }).exec(function (err, costs) {
+                if (err) {
+                    res.json(err);
+                }
+
+                result.daysCount = defaultDaysCount;
+                result.content = utilities.createStatisticData(costs, startDate, currentDay);
+                res.json(result);
+            });
+        }
     }
 };
 
